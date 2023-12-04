@@ -6,16 +6,15 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Connect to MongoDB
-mongoose.connect('mongodb://localhost:27017/userDB', { useNewUrlParser: true, useUnifiedTopology: true });
+mongoose.connect('mongodb://localhost:27017/blogDB', { useNewUrlParser: true, useUnifiedTopology: true });
 
-// Define a user schema
-const userSchema = new mongoose.Schema({
-    username: String,
-    email: String,
-    password: String
+// Define a post schema
+const postSchema = new mongoose.Schema({
+    title: String,
+    content: String
 });
 
-const User = mongoose.model('User', userSchema);
+const Post = mongoose.model('Post', postSchema);
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static('public'));
@@ -24,18 +23,27 @@ app.get('/', (req, res) => {
     res.sendFile(__dirname + '/index.html');
 });
 
-app.post('/register', (req, res) => {
-    const newUser = new User({
-        username: req.body.username,
-        email: req.body.email,
-        password: req.body.password
+app.get('/posts', (req, res) => {
+    Post.find({}, (err, posts) => {
+        if (err) {
+            res.send('Error fetching posts.');
+        } else {
+            res.json(posts);
+        }
+    });
+});
+
+app.post('/posts', (req, res) => {
+    const newPost = new Post({
+        title: req.body.title,
+        content: req.body.content
     });
 
-    newUser.save((err) => {
+    newPost.save((err) => {
         if (err) {
-            res.send('Error registering user.');
+            res.send('Error publishing post.');
         } else {
-            res.send('User registered successfully.');
+            res.send('Post published successfully.');
         }
     });
 });
